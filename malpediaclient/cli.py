@@ -7,6 +7,67 @@ import base64
 import sys
 from operator import itemgetter
 
+CONFIG_LOCATIONS = [
+    # Current directory
+    os.path.join(os.curdir, "malpedia.json"),
+    os.path.join(os.curdir, ".malpedia.json"),
+    # Linux user takes precedence over linux system
+    "$HOME/.malpedia.json",
+    "/etc/malpedia.json",
+    # Windows
+    R"${APPDATA}\malpedia\malpedia.json",
+]
+
+def _load_config_and_authenticate(malpedia_client):
+    username, password, apitoken = None, None, None
+    has_config = False
+
+    # try to find a config in common locations
+    for loc in [os.path.expandvars(loc) for loc in CONFIG_LOCATIONS]:
+        try:
+            with open(loc, "r") as cfg_file:
+                cfg = json.load(cfg_file)
+                if 'username' in cfg:
+                    username = cfg['username']
+                if 'password' in cfg:
+                    password = cfg['password']
+                if 'apitoken' in cfg:
+                    apitoken = cfg['apitoken']
+
+                if apitoken or (username and password):
+                    has_config = True
+                    break
+                else:
+                    print("[!] Found config file \"{}\" but it does neither contain an apitoken nor a username and password.".format(loc))
+                    return False
+        except json.JSONDecodeError as err:
+            print("[!] Found config file \"{}\" but it does not contain valid JSON: {}".format(loc, err.msg))
+            return False
+        except IOError:
+            # look for the next possible location
+            pass
+
+    if not has_config:
+        try:
+            # try to import a python config file
+            # This is for backwards compatibility
+            import config
+            if config.MALPEDIA_APITOKEN:
+                apitoken = config.MALPEDIA_APITOKEN
+            elif config.MALPEDIA_USERNAME and config.MALPEDIA_PASSWORD:
+                username = config.MALPEDIA_USERNAME
+                password = config.MALPEDIA_PASSWORD
+        except:
+            return False
+
+    # at this point we are guaranteed to either have an apitoken or a username and password
+    if apitoken:
+        print("[*] Using apitoken from config")
+        malpedia_client.authenticate_by_token(apitoken)
+    else:
+        print("[*] Using credentials from config (username: \"{}\")".format(username))
+        malpedia_client.authenticate(username, password)
+    return True
 
 def _printj(result):
     print(json.dumps(result, sort_keys=True, indent=2))
@@ -39,19 +100,9 @@ def main():
         client_version = malpediaclient.__version__
     parser.add_argument("--version", action="version", version="malpediaclient {}".format(client_version))
     parser.set_defaults(func=lambda args: parser.print_help())
-    has_config = False
-    try:
-        # try to import a config file and authenticate
-        import config
-        if config.MALPEDIA_APITOKEN:
-            print("[*] Using apitoken from config")
-            malpedia_client.authenticate_by_token(config.MALPEDIA_APITOKEN)
-        elif config.MALPEDIA_USERNAME and config.MALPEDIA_PASSWORD:
-            print("[*] Using credentials from config (username: \"{}\")".format(config.MALPEDIA_USERNAME))
-            malpedia_client.authenticate(config.MALPEDIA_USERNAME, config.MALPEDIA_PASSWORD)
-        has_config = True
-    except:
-        print("[!] No configuration file (config.py) found, requiring credentials/token from cmdline parameters if needed.")
+    has_config = _load_config_and_authenticate(malpedia_client)
+    if not has_config:
+        print("[!] No configuration file found, requiring credentials/token from cmdline parameters if needed.")
         # if there is no config file, the user needs to specify username+password
         parser.add_argument('--credentials', type=str, help="Credentials for malpedia in the form username:password", required=False)
         parser.add_argument('--apitoken', type=str, help="Apitoken for malpedia", required=False)
