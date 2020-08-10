@@ -10,3 +10,6 @@ However, for the analytics and some other extended functionalities, an account a
 ## CLI Usage
 Either use `python run.py --help` in this directory or `malpediaclient --help` from anywhere.
 
+## Changelog
+
+ * 2020-08-10 added support for a JSON config file to enable storing an apitoken or user/password for authentication (THX to [Luca Corbatto](https://github.com/targodan))
