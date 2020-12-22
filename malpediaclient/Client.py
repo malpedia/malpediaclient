@@ -116,7 +116,7 @@ class Client():
         Provide meta data for all families.
         Access limitation: none
         """
-        return self.__make_api_call('get/families/')
+        return self.__make_api_call('get/families')
 
     def get_sample_raw(self, sha256):
         """
