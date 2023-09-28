@@ -1,1 +1,1 @@
-from malpediaclient.MalpediaApiClient import MalpediaApiClient
+from malpediaclient.malpediaclient import Client
