@@ -1,14 +1,10 @@
 import requests
-try:
-    from urllib.parse import urljoin
-except ImportError:
-    # Python2 fallback
-    from urlparse import urljoin
+from urllib.parse import urljoin
 from requests.auth import HTTPBasicAuth
 import os
 
 
-class Client():
+class Client:
     """
     Python interface for functionalities provided by the REST Api of the Malpedia project.
     https://malpedia.caad.fkie.fraunhofer.de
@@ -23,6 +19,7 @@ class Client():
         Args:
             username: Your Malpedia username.
             password: Your Malpedia password.
+            apitoken: Your Malpedia API token.
         """
         self.__credentials = None
         self.__headers = {}
@@ -38,7 +35,7 @@ class Client():
         Args:
             apitoken: A active Apitoken that was generated on Malpedia.
         """
-        self.__headers.update({'Authorization': 'APIToken {}'.format(apitoken)})
+        self.__headers.update({'Authorization': f'APIToken {apitoken}'})
 
     def authenticate(self, username, password):
         """
@@ -52,171 +49,210 @@ class Client():
 
     def list_families(self):
         """
-        List all family IDs. This is a helper command to enable follow up commands family data.
-        Access limitation: none
+        List all available families.
         """
-        return self.__make_api_call('list/families')
+        return self.__make_api_call('api/list/families')
 
     def list_actors(self):
         """
-        List all actor IDs. This is a helper command to enable follow commands involving actor data.
-        Access limitation: none
+        List all available actors.
         """
-        return self.__make_api_call('list/actors')
+        return self.__make_api_call('api/list/actors')
 
     def list_apiscout(self):
         """
-        Provide a list of all non-zero ApiVector fingerprints that are currently on Malpedia.
-        Access limitation: registration
+        List all available ApiScout data.
         """
-        return self.__make_api_call('list/apiscout')
+        return self.__make_api_call('api/list/apiscout')
 
     def list_apiscout_csv(self, destination):
         """
-        Provide a list of all non-zero ApiVector fingerprints that are currently on Malpedia (in CSV format compatible with ApiScout).
-        Access limitation: registration
+        Download ApiScout data as CSV.
+
+        Args:
+            destination: Path where the CSV file should be stored.
         """
-        res = self.__make_api_call('list/apiscout/csv', raw=True)
-        with open(destination, "wb") as csvfile:
-            csvfile.write(res)
+        result = self.__make_api_call('api/list/apiscout/csv', raw=True)
+        with open(destination, 'wb') as f:
+            f.write(result)
 
     def get_yara_aggregated(self, tlp, destination="malpedia.yar"):
         """
-        Provide all YARA rules with given TLP.
-        Access limitation: registration
+        Download all YARA rules as a single file.
+
+        Args:
+            tlp: TLP level of the rules to download.
+            destination: Path where the YARA file should be stored.
         """
-        res = self.__make_api_call('get/yara/{}/raw'.format(tlp), raw=True)
-        with open(destination, "wb") as csvfile:
-            csvfile.write(res)
+        result = self.__make_api_call(f'api/get/yara/aggregated/{tlp}', raw=True)
+        with open(destination, 'wb') as f:
+            f.write(result)
 
     def list_samples(self, family_id):
         """
-        Provide a list of all samples known for a family, including their packed status and version, if available.
-        Access limitation: registration
+        List all samples for a given family.
+
+        Args:
+            family_id: ID of the family.
         """
-        return self.__make_api_call('list/samples/{}'.format(family_id))
+        return self.__make_api_call(f'api/list/samples/{family_id}')
 
     def list_yara(self):
         """
-        Provide a list of all YARA rules in malpedia for all families.
-        Output may vary depending on access level (public = white, registration = green, amber).
-        Access limitation: none (but result may vary for registered users)
+        List all available YARA rules.
+
+        Returns:
+            A list of all available YARA rules.
         """
-        return self.__make_api_call('list/yara')
+        return self.__make_api_call('api/list/yara')
 
     def get_family(self, family_id):
         """
-        Provide meta data for a single family, as identified by <family_id>.
-        Access limitation: none
+        Get information about a specific family.
+
+        Args:
+            family_id: ID of the family.
         """
-        return self.__make_api_call('get/family/{}'.format(family_id))
+        return self.__make_api_call(f'api/get/family/{family_id}')
 
     def get_families(self):
         """
-        Provide meta data for all families.
-        Access limitation: none
+        Get information about all families.
         """
-        return self.__make_api_call('get/families')
+        return self.__make_api_call('api/get/families')
 
     def get_sample_raw(self, sha256):
         """
-        Provide the sample alongside potentially existing unpacked or dumped files.
-        Access limitation: registration
+        Download a specific sample.
+
+        Args:
+            sha256: SHA256 hash of the sample.
         """
-        return self.__make_api_call('get/sample/{}/raw'.format(sha256))
+        return self.__make_api_call(f'api/get/sample/{sha256}/raw', raw=True)
 
     def get_sample_zip(self, sha256):
         """
-        Provide the sample alongside potentially existing unpacked or dumped files.
-        Access limitation: registration
+        Download a specific sample as a password-protected ZIP file.
+
+        Args:
+            sha256: SHA256 hash of the sample.
         """
-        return self.__make_api_call('get/sample/{}/zip'.format(sha256))
+        return self.__make_api_call(f'api/get/sample/{sha256}/zip', raw=True)
 
     def get_yara(self, family_id):
         """
-        Provide the YARA rules for a given <family_id>.
-        Output may vary depending on access level (public = white, registration = green, amber).
-        Access limitation: none (but result may vary for registered users)
+        Get YARA rules for a specific family.
+
+        Args:
+            family_id: ID of the family.
+
+        Returns:
+            YARA rules for the specified family.
         """
-        return self.__make_api_call('get/yara/{}'.format(family_id))
+        return self.__make_api_call(f'api/get/yara/{family_id}')
 
     def get_actor(self, actor_id):
         """
-        Provide the meta information for a given <actor_id>.
-        Access limitation: none
+        Get information about a specific actor.
+
+        Args:
+            actor_id: ID of the actor.
         """
-        return self.__make_api_call('get/actor/{}'.format(actor_id))
+        return self.__make_api_call(f'api/get/actor/{actor_id}')
 
     def get_misp(self):
         """
-        A current view of Malpedia in the MISP galaxy cluster format.
-        Access limitation: none
+        Get MISP data.
         """
-        return self.__make_api_call('get/misp')
+        return self.__make_api_call('api/get/misp')
 
     def get_version(self):
         """
-        Obtain the current version of Malpedia (commit number and date).
-        Access limitation: none
+        Get version information.
         """
-        return self.__make_api_call('get/version')
+        return self.__make_api_call('api/get/version')
 
     def get_yara_after(self, date):
         """
-        Provide all YARA rules with a version newer than a specific date. Intended for users intending regular automated updates.
-        Output may vary depending on access level (public = white, registration = green, amber).
-        Access limitation: none (but result may vary for registered users)
+        Get YARA rules updated after a specific date.
+
+        Args:
+            date: Date in the format YYYY-MM-DD.
+
+        Returns:
+            YARA rules updated after the specified date.
         """
-        return self.__make_api_call('get/yara/after/{}'.format(date))
+        return self.__make_api_call(f'api/get/yara/after/{date}')
 
     def find_family(self, needle):
         """
-        Provide a list of all family names and associated synonyms where a part (<needle>) of the name is matched.
-        Access limitation: none
+        Search for a family.
+
+        Args:
+            needle: Search term.
         """
-        return self.__make_api_call('find/family/{}'.format(needle))
+        return self.__make_api_call(f'api/find/family/{needle}')
 
     def find_actor(self, needle):
         """
-        Provide a list of all actor names and associated synonyms where a part (<needle>) of the name is matched.
-        Output is potentially subject to change and may include the responsible "name-creator" (e.g. "fireeye": "APT 28", "crowdstrike": "Fancy Bear", ...) in the future.
-        Access limitation: none
+        Search for an actor.
+
+        Args:
+            needle: Search term.
         """
-        return self.__make_api_call('find/actor/{}'.format(needle))
+        return self.__make_api_call(f'api/find/actor/{needle}')
 
     def scan_binary(self, filepath):
         """
-        Have a binary scanned against all YARA rules currently contained in Malpedia.
-        The format of <yara_scan_report> is TBD.
-        Access limitation: registration
+        Scan a binary file with all YARA rules.
 
         Args:
-            filepath: Path to the file you wish to analyze. raw binary OR zip file (pwd:infected) containing one or more binaries.
+            filepath: Path to the binary file.
         """
-        with open(filepath, "rb") as input_file:
-            return self.__make_api_call('scan/binary', files={'input_file': input_file}, method='POST')
+        with open(filepath, 'rb') as f:
+            files = {'file': f}
+            return self.__make_api_call('api/scan/binary', method='POST', files=files)
 
     def scan_yara(self, filepath, family_id=None):
         """
-        Have a YARA rule used to scan against all samples (packed, unpacked, dumped) currently contained in Malpedia.
-        The format of <yara_scan_report> is TBD.
-        Access limitation: registration
+        Scan a YARA rule against all samples.
 
         Args:
-            filepath: Path to the yara-rule.
+            filepath: Path to the YARA rule file.
+            family_id: Optional family ID to limit the scan.
         """
-        url = 'scan/yara/{}'.format(family_id) if family_id else 'scan/yara'
-        with open(filepath, "rb") as input_file:
-            return self.__make_api_call(url, data=input_file.read(), method='POST')
+        with open(filepath, 'rb') as f:
+            files = {'file': f}
+            if family_id:
+                return self.__make_api_call(f'api/scan/yara/{family_id}', method='POST', files=files)
+            else:
+                return self.__make_api_call('api/scan/yara', method='POST', files=files)
 
     def __make_api_call(self, path, method='GET', files=None, data=None, raw=False):
-        apicall_path = "https://malpedia.caad.fkie.fraunhofer.de/api/" + path.lstrip("/")
-        response = requests.request(method, apicall_path, auth=self.__credentials, headers=self.__headers, files=files, data=data)
-        if response.status_code == 200:
-            if raw: return response.content
-            return response.json()
-        elif response.status_code == 403:
-            raise Exception("Not authorized. You need to be authenticated for this API call.")
-        elif response.status_code == 404:
-            raise Exception("Not found. Either the resource you requested does not exist or you need to authenticate.")
-        raise Exception("HTTP Status Code {:d}. Error while making request.".format(response.status_code))
+        """
+        Make an API call to the Malpedia REST API.
+
+        Args:
+            path: API endpoint path.
+            method: HTTP method to use.
+            files: Files to upload.
+            data: Data to send.
+            raw: Whether to return the raw response.
+
+        Returns:
+            API response.
+        """
+        url = urljoin('https://malpedia.caad.fkie.fraunhofer.de/', path)
+        if method == 'GET':
+            response = requests.get(url, auth=self.__credentials, headers=self.__headers)
+        elif method == 'POST':
+            response = requests.post(url, auth=self.__credentials, headers=self.__headers, files=files, data=data)
+        else:
+            raise ValueError(f"Unsupported HTTP method: {method}")
+
+        if response.status_code != 200:
+            raise Exception(f"API call failed with status code {response.status_code}: {response.text}")
+
+        if raw:
+            return response.content
+        return response.json()
