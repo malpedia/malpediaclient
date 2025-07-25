@@ -77,7 +77,6 @@ class MyParser(argparse.ArgumentParser):
         sys.exit(2)
 
 def main():
-    print(malpediaclient.__version__)
     parser = MyParser(description='Malpedia API Client v{}'.format(malpediaclient.__version__))
     subparsers = parser.add_subparsers(dest='command', help='Commands')
     subparsers.required = True
