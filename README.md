@@ -11,7 +11,7 @@ However, for the analytics and some other extended functionalities, an account a
 
 ## Installation
 
-Since version v0.3.1 `malpediaclient` is available via PyPI, which simplifies installation to:
+Since version v0.3.1 `malpediaclient` is available via [PyPI](https://pypi.org/project/malpediaclient/0.3.2/), which simplifies installation to:
 
 ```bash
 pip install malpediaclient
