@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 from setuptools import setup, find_packages
-import malpediaclient
 from pathlib import Path
 
 # Read the README.md file
@@ -15,7 +14,7 @@ with open('LICENSE', encoding='utf-8') as f:
 
 setup(
     name='malpediaclient',
-    version=malpediaclient.__version__,
+    version="0.3.1",
     description='Malpedia REST API Client.',
     long_description=README,
     long_description_content_type='text/markdown',

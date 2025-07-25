@@ -11,6 +11,16 @@ However, for the analytics and some other extended functionalities, an account a
 
 ## Installation
 
+Since version v0.3.1 `malpediaclient` is available via PyPI, which simplifies installation to:
+
+```bash
+pip install malpediaclient
+```
+
+
+In case you want to install locally from the repository, please use:
+
+
 ```bash
 pip install -e .
 ```
@@ -54,5 +64,6 @@ You can configure your Malpedia credentials in several ways:
 
 ## Changelog
 
-* 2025-03-13 Updated to Python 3, removed Python 2 compatibility code, improved error handling (THX to [Marc R](https://github.com/seifreed))
-* 2020-08-10 Added support for a JSON config file to enable storing an apitoken or user/password for authentication (THX to [Luca Corbatto](https://github.com/targodan))
+* 2025-07-25: v0.3.1: Removed dependency issue in setup.py, disabled scan functions, and published to PyPI (THX to [dspruell-rs](https://github.com/dspruell-rs)).
+* 2025-03-13: v0.3.0: Updated to Python 3, removed Python 2 compatibility code, improved error handling (THX to [Marc R](https://github.com/seifreed)).
+* 2020-08-10: Added support for a JSON config file to enable storing an apitoken or user/password for authentication (THX to [Luca Corbatto](https://github.com/targodan)).

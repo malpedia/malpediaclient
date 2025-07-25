@@ -77,6 +77,7 @@ class MyParser(argparse.ArgumentParser):
         sys.exit(2)
 
 def main():
+    print(malpediaclient.__version__)
     parser = MyParser(description='Malpedia API Client v{}'.format(malpediaclient.__version__))
     subparsers = parser.add_subparsers(dest='command', help='Commands')
     subparsers.required = True
@@ -254,10 +255,12 @@ def get_version_result(args, malpedia_client):
     _printj(result)
 
 def scan_binary_result(args, malpedia_client):
+    raise NotImplementedError("The command scan_binary_result is currently disabled server-side.")
     result = malpedia_client.scan_binary(args.filepath)
     _printj(result)
 
 def scan_yara_result(args, malpedia_client):
+    raise NotImplementedError("The command scan_binary_result is currently disabled server-side.")
     result = malpedia_client.scan_yara(args.filepath, args.family_id)
     _printj(result)
 
