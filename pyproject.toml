@@ -1,0 +1,71 @@
+[project]
+name = "malpedia"
+version = "1.0.0"
+description = "Python client and command-line interface for the Malpedia REST API"
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+authors = [{ name = "Steffen Enders", email = "steffen.enders@tu-dortmund.de" }]
+requires-python = ">=3.11"
+dependencies = [
+    "click>=8.2",
+    "httpx>=0.28",
+    "rich>=14",
+    "rich-click>=1.9",
+]
+keywords = ["malpedia", "malware", "threat-intelligence", "yara", "cli"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Security",
+    "Typing :: Typed",
+]
+
+[project.urls]
+Homepage = "https://malpedia.caad.fkie.fraunhofer.de"
+Documentation = "https://malpedia.caad.fkie.fraunhofer.de/usage/api"
+Repository = "https://github.com/malpedia/malpediaclient"
+Issues = "https://github.com/malpedia/malpediaclient/issues"
+
+[project.scripts]
+malpedia = "malpedia.cli:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=9",
+    "ruff>=0.17",
+    "ty>=0.0.107",
+]
+
+[build-system]
+requires = ["uv_build>=0.13.9,<0.14"]
+build-backend = "uv_build"
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "UP", "B", "C4", "SIM", "RET", "PTH", "PT", "RUF", "D"]
+extend-select = ["D404"]
+ignore = ["D105", "D107"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["D"]
+
+[tool.pytest]
+minversion = "9.0"
+testpaths = ["tests"]
+strict = true
+addopts = ["-ra", "-m", "not live"]
+markers = ["live: calls the real Malpedia API (needs network; some tests need MALPEDIA_API_TOKEN)"]
